@@ -75,7 +75,9 @@ export function CookieConsent() {
       .then(({ default: Clarity }) => {
         if (cancelled) return;
         Clarity.init(id);
-        Clarity.consent(true);
+        // consentV2 mirrors the GA Consent Mode signal: analytics yes, ads no.
+        // Calling it with no argument would grant BOTH, including ad storage.
+        Clarity.consentV2({ ad_Storage: "denied", analytics_Storage: "granted" });
       })
       .catch((err) => console.error("[consent] Clarity init failed", err));
     return () => {
