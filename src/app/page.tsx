@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { HeroTitle } from "@/components/HeroTitle";
 import { Reveal } from "@/components/Reveal";
@@ -163,14 +164,25 @@ export default function Home() {
               >
                 <Cropmarks />
                 <div className="border border-border transition-colors group-hover:border-accent">
-                  <div
-                    aria-hidden="true"
-                    className="flex aspect-4/3 items-center justify-center bg-subtle"
-                  >
-                    <span className="font-display text-6xl font-bold text-accent">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                  </div>
+                  {w.frontmatter.hero ? (
+                    <Image
+                      src={w.frontmatter.hero}
+                      alt={w.frontmatter.heroAlt ?? ""}
+                      width={1200}
+                      height={900}
+                      sizes="(min-width: 640px) 30vw, 90vw"
+                      className="aspect-4/3 w-full object-cover object-top"
+                    />
+                  ) : (
+                    <div
+                      aria-hidden="true"
+                      className="flex aspect-4/3 items-center justify-center bg-subtle"
+                    >
+                      <span className="font-display text-6xl font-bold text-accent">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                    </div>
+                  )}
                   <div className="border-t border-border p-5">
                     <p className="font-mono text-[11px] uppercase tracking-widest text-muted">
                       {w.frontmatter.tags?.slice(0, 2).join(" · ")}

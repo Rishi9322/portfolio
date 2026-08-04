@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Bricolage_Grotesque } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -57,6 +58,8 @@ const personJsonLd = {
   sameAs: [site.social.github, site.social.linkedin],
 };
 
+const gaId = process.env.NEXT_PUBLIC_GA_ID;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -81,6 +84,12 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
         />
         <Analytics />
+        {/*
+          GA4 loads only when a measurement ID is configured, so preview and
+          local builds stay clean. Vercel Analytics stays as the primary
+          dashboard; GA adds audience/acquisition reporting on top.
+        */}
+        {gaId && <GoogleAnalytics gaId={gaId} />}
       </body>
     </html>
   );

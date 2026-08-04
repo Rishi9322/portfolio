@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { Reveal } from "@/components/Reveal";
 import { getWork } from "@/lib/content";
@@ -29,12 +30,27 @@ export default function WorkPage() {
               href={`/work/${w.slug}`}
               className="group grid overflow-hidden rounded-2xl border border-border transition-colors hover:border-accent sm:grid-cols-[2fr_3fr]"
             >
-              <div
-                aria-hidden="true"
-                className="flex aspect-video items-center justify-center bg-subtle font-display text-6xl font-bold text-accent sm:aspect-auto"
-              >
-                {String(i + 1).padStart(2, "0")}
-              </div>
+              {w.frontmatter.hero ? (
+                <div className="relative aspect-video sm:aspect-auto">
+                  <Image
+                    src={w.frontmatter.hero}
+                    alt={w.frontmatter.heroAlt ?? ""}
+                    fill
+                    sizes="(min-width: 640px) 40vw, 100vw"
+                    className="object-cover object-top"
+                  />
+                  <span className="absolute left-4 top-3 font-mono text-xs text-background mix-blend-difference">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                </div>
+              ) : (
+                <div
+                  aria-hidden="true"
+                  className="flex aspect-video items-center justify-center bg-subtle font-display text-6xl font-bold text-accent sm:aspect-auto"
+                >
+                  {String(i + 1).padStart(2, "0")}
+                </div>
+              )}
               <div className="flex flex-col justify-center p-7 sm:p-10">
                 {w.frontmatter.tags && (
                   <p className="text-xs uppercase tracking-widest text-muted">
