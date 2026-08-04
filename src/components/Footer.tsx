@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { site, nav } from "@/lib/site";
+import { CookieSettingsLink } from "./CookieSettingsLink";
 
 export function Footer() {
   return (
@@ -47,9 +48,9 @@ export function Footer() {
         </ul>
       </div>
       <div className="mx-auto max-w-6xl px-5 pb-8 text-xs text-muted">
-        © {new Date().getFullYear()} Rishi. Built with Next.js. This site uses
-        analytics cookies (Google Analytics, Microsoft Clarity) to understand
-        how visitors use it.
+        © {new Date().getFullYear()} Rishi. Built with Next.js. Analytics
+        cookies (Google Analytics, Microsoft Clarity) load only if you accept
+        them. <CookieSettingsLink />
       </div>
     </footer>
   );

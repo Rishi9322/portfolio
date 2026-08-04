@@ -1,12 +1,10 @@
 import * as Sentry from "@sentry/nextjs";
-import Clarity from "@microsoft/clarity";
 
 /*
-  Client-side observability, initialised before the app becomes interactive.
+  Client-side error tracking, initialised before the app becomes interactive.
 
-  Each tool is gated on its own env var, so a missing key is a no-op instead of
-  a crash, and every init is wrapped — a failure in one must never take down
-  the others or the page itself.
+  Gated on its env var, so a missing DSN is a no-op instead of a crash, and the
+  init is wrapped so a failure here never takes down the page.
 */
 
 // Sentry — errors and traces.
@@ -25,13 +23,7 @@ if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
   }
 }
 
-// Microsoft Clarity — session replay and heatmaps.
-if (process.env.NEXT_PUBLIC_CLARITY_ID && process.env.NODE_ENV === "production") {
-  try {
-    Clarity.init(process.env.NEXT_PUBLIC_CLARITY_ID);
-  } catch (err) {
-    console.error("[instrumentation] Clarity init failed", err);
-  }
-}
+// Clarity and GA are NOT started here — they set cookies, so they load only
+// after the visitor opts in. See components/CookieConsent.tsx.
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
