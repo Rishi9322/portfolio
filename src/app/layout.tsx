@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Bricolage_Grotesque } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
+import Script from "next/script";
 import { CookieConsent } from "@/components/CookieConsent";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import { WebMCPTools, type WebMCPData } from "@/components/WebMCPTools";
 import { getWork, getFeedPosts } from "@/lib/content";
 import { allProjects } from "@/lib/projects";
@@ -98,6 +100,8 @@ export default function RootLayout({
     },
   };
 
+  const gaId = process.env.NEXT_PUBLIC_GA_ID;
+
   return (
     <html
       lang="en"
@@ -118,8 +122,31 @@ export default function RootLayout({
         />
         <Analytics />
         {/*
-          Consent gate: renders GA4 and starts Clarity only after the visitor
-          opts in. Vercel Analytics stays outside it — it is cookieless.
+          Google Consent Mode v2. The tag loads on every page (so GA can verify
+          installation and so nothing is lost between page load and the click),
+          but every storage type starts DENIED — gtag holds events in memory and
+          writes no cookie until CookieConsent calls consent "update".
+        */}
+        {gaId && (
+          <>
+            <Script id="gtag-consent-default" strategy="beforeInteractive">
+              {`window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('consent','default',{
+                  ad_storage:'denied',
+                  ad_user_data:'denied',
+                  ad_personalization:'denied',
+                  analytics_storage:'denied',
+                  wait_for_update: 500
+                });`}
+            </Script>
+            <GoogleAnalytics gaId={gaId} />
+          </>
+        )}
+        {/*
+          Consent gate: flips GA storage on and starts Clarity (which has no
+          consent-mode equivalent) only after the visitor opts in. Vercel
+          Analytics stays outside it — it is cookieless.
         */}
         <CookieConsent />
         <WebMCPTools data={mcpData} />

@@ -1,15 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { GoogleAnalytics } from "@next/third-parties/google";
 
 /*
   Analytics consent gate.
 
-  Nothing that sets a cookie loads until the visitor opts in: GA4 is not
-  rendered and Clarity is not initialised while consent is unknown or denied.
-  The choice is remembered in localStorage (not a cookie, so the banner itself
-  never sets one) and can be changed from the footer.
+  Nothing that sets a cookie runs until the visitor opts in. The GA tag is
+  present from page load (so Google can verify the install) but starts under
+  Consent Mode v2 with analytics_storage DENIED, writing no cookie; accepting
+  sends the consent "update" that switches it on. Clarity has no equivalent, so
+  it is not loaded at all until consent. The choice is remembered in
+  localStorage (not a cookie, so the banner itself never sets one) and can be
+  changed from the footer.
 
   Sentry is deliberately NOT gated here — it records errors, sets no tracking
   cookie, and is configured with sendDefaultPii: false.
@@ -52,6 +54,16 @@ export function CookieConsent() {
     return () => window.removeEventListener(CONSENT_CHANGED_EVENT, sync);
   }, [sync]);
 
+  // Tell gtag the moment consent changes, both ways.
+  useEffect(() => {
+    if (consent === undefined) return;
+    const gtag = (window as unknown as { gtag?: (...args: unknown[]) => void }).gtag;
+    if (!gtag) return;
+    gtag("consent", "update", {
+      analytics_storage: consent === "granted" ? "granted" : "denied",
+    });
+  }, [consent]);
+
   // Start Clarity only once consent is granted.
   useEffect(() => {
     if (consent !== "granted") return;
@@ -80,12 +92,8 @@ export function CookieConsent() {
     setConsent(value);
   };
 
-  const gaId = process.env.NEXT_PUBLIC_GA_ID;
-
   return (
     <>
-      {consent === "granted" && gaId && <GoogleAnalytics gaId={gaId} />}
-
       {consent === null && (
         <div
           role="dialog"
@@ -103,8 +111,8 @@ export function CookieConsent() {
               </p>
               <p className="mt-1 max-w-xl text-sm text-muted">
                 I use Google Analytics and Microsoft Clarity to see which work
-                people actually read. Nothing loads until you say yes, and I
-                never sell or share the data.
+                people actually read. No cookies are stored until you say yes,
+                and I never sell or share the data.
               </p>
             </div>
             <div className="flex shrink-0 gap-3">
