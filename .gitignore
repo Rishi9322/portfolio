@@ -39,3 +39,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local agent tooling — not part of the build
+.claude/
+.agents/
+skills-lock.json
+
+# downloaded asset pack, unused by the site (15 MB, own license terms)
+kenney_cube-pets_1.0/
+
+# the served copy is public/resume.pdf; keep the source PDF out of the repo
+/Rishi_Poddar_Resume_2026_v3.pdf

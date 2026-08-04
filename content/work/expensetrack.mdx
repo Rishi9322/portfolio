@@ -1,0 +1,61 @@
+---
+title: "ExpenseTrack"
+outcome: "A live expense-tracking dashboard — React 19 + Turso, with analytics charts, currency conversion, and CI/CD that deploys itself."
+description: "Case study: building ExpenseTrack with React 19, Vite, Turso/libSQL, Chart.js analytics, and a GitHub Actions pipeline that ships to Vercel on every push to main."
+date: "2026-03-24"
+tags: ["React 19", "Vite", "Turso", "CI/CD"]
+featured: true
+repo: "https://github.com/Rishi9322/m-mojo"
+live: "https://mmojo.vercel.app"
+---
+
+> Draft written from the repo README — add screenshots and real usage numbers
+> from the Week 0 content audit.
+
+## Spark
+
+Expense trackers either live in a spreadsheet nobody opens or an app that
+wants a subscription. I wanted the middle: a fast dashboard I actually open,
+with my data in a real database I own.
+
+## Shape
+
+The design brief was "summary first" — the landing view answers *how much,
+on what, this month* before any interaction. Doughnut chart for category
+split, bar chart for the timeline, one summary panel. Dark mode from day one
+because expense checks happen at night.
+
+## Build
+
+React 19 + Vite 8 on the front, Turso/libSQL as the storage layer via
+`@libsql/client/web` — serverless SQLite reached straight from the browser
+layer, no backend to maintain:
+
+```js
+// src/lib/db.js — the whole data layer talks to Turso over HTTP
+const client = createClient({
+  url: import.meta.env.VITE_TURSO_URL,
+  authToken: import.meta.env.VITE_TURSO_TOKEN,
+});
+```
+
+Chart.js (via react-chartjs-2) renders the analytics; a live exchange-rate
+feed converts totals from USD.
+
+## Launch
+
+Shipping is automated: a GitHub Actions workflow lints, builds, and deploys
+to Vercel production on every push to `main`. The README badge row — CI
+status, live-site uptime — is the launch poster.
+
+## Capture
+
+The live app runs at [mmojo.vercel.app](https://mmojo.vercel.app) — the
+fastest way to understand the project is to add an expense and watch the
+charts move.
+
+## Reflection
+
+Wiring CI/CD before adding features felt slow for a week and paid for itself
+every week after. "Push to main and it's live" changes how willing you are to
+ship small improvements.

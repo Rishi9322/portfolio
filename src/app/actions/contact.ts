@@ -1,7 +1,6 @@
 "use server";
 
 import { headers } from "next/headers";
-import { site } from "@/lib/site";
 
 export type ContactState = {
   status: "idle" | "success" | "error";
@@ -30,7 +29,17 @@ function rateLimited(ip: string): boolean {
   return false;
 }
 
-export async function submitContact(
+/*
+  Validates a submission and mirrors it to the lead pipeline. It does NOT send
+  the email.
+
+  Web3Forms' free plan rejects server-to-server calls ("Use our API in client
+  side... Pro plan is required"), so the actual send happens in the browser —
+  see ConnectForm. Everything that genuinely needs the server (honeypot, IP
+  rate limit, field validation) still runs here first, so the browser only ever
+  sends a submission this function has already approved.
+*/
+export async function validateContact(
   _prev: ContactState,
   formData: FormData
 ): Promise<ContactState> {
@@ -66,32 +75,31 @@ export async function submitContact(
     };
   }
 
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
-    // Dev / not-yet-configured: log instead of sending so the form is testable.
-    console.log("[contact] (RESEND_API_KEY not set)", { name, email, reason, message });
-    return { status: "success" };
+  /*
+    Optional second destination: an Activepieces webhook, so form leads land in
+    the same pipeline as Cal.com bookings (sheet / CRM / digest). The email
+    itself goes out via Web3Forms from the browser, so a failure here must never
+    block the visitor — it is logged and swallowed.
+  */
+  const webhook = process.env.CONTACT_WEBHOOK_URL;
+  if (webhook) {
+    try {
+      await fetch(webhook, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          email,
+          reason,
+          message,
+          source: "madebyrishi-contact-form",
+          submittedAt: new Date().toISOString(),
+        }),
+      });
+    } catch (err) {
+      console.error("[contact] webhook mirror failed", err);
+    }
   }
 
-  try {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: "Portfolio <onboarding@resend.dev>",
-        to: [site.email],
-        reply_to: email,
-        subject: `[madebyrishi] ${reason} — ${name}`,
-        text: `From: ${name} <${email}>\nReason: ${reason}\n\n${message}`,
-      }),
-    });
-    if (!res.ok) throw new Error(`Resend ${res.status}`);
-    return { status: "success" };
-  } catch (err) {
-    console.error("[contact] send failed", err);
-    return { status: "error", message: "Sending failed." };
-  }
+  return { status: "success" };
 }

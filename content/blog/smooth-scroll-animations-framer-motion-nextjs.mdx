@@ -1,0 +1,61 @@
+---
+title: "Smooth Scroll Animations with Framer Motion in Next.js (Without Wrecking Performance)"
+description: "How to build reveal-on-scroll and parallax effects in Next.js with Framer Motion while keeping Core Web Vitals green and respecting prefers-reduced-motion."
+date: "2026-07-20"
+keyword: "smooth scroll animations framer motion next.js"
+tags: ["Next.js", "Framer Motion", "Performance"]
+---
+
+> **SAMPLE POST** — replace with the real drafted post from the Week 0 content
+> audit. Structure and code below are illustrative.
+
+Scroll animations are the fastest way to make a site feel expensive — and the
+fastest way to make it feel broken. This post covers the pattern I use on this
+site: reveal-on-scroll with Framer Motion that stays under budget and switches
+itself off for users who ask for reduced motion.
+
+## The reveal component
+
+The whole trick is `whileInView` with `once: true` — animate on first sight,
+then never touch the element again:
+
+```tsx
+export function Reveal({ children }: { children: React.ReactNode }) {
+  const reduce = useReducedMotion();
+  if (reduce) return <>{children}</>;
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.6 }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+```
+
+## Why `once: true` matters
+
+Animating on every scroll direction re-triggers layout work and makes content
+feel unstable. One reveal, then static, keeps CLS at zero.
+
+## Respecting prefers-reduced-motion
+
+`useReducedMotion()` isn't a nice-to-have — vestibular disorders are real, and
+WCAG expects non-essential animation to be disableable. Returning plain
+children means reduced-motion users get instant content, not a degraded
+animation.
+
+## Keeping the JS budget
+
+Framer Motion is tree-shakeable; importing only `motion` and
+`useReducedMotion` keeps the cost far below a full animation library. Measure
+with `next build` and keep your first-load JS under 200KB.
+
+## Takeaways
+
+- `whileInView` + `once: true` for reveals; never scroll-jack.
+- Gate everything behind `useReducedMotion`.
+- Parallax beyond ~10% translation reads as gimmick and costs frames.

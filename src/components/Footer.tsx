@@ -6,7 +6,9 @@ export function Footer() {
     <footer className="mt-24 border-t border-border">
       <div className="mx-auto flex max-w-6xl flex-col gap-8 px-5 py-12 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="font-display text-lg font-semibold">MADE BY RISHI</p>
+          <p className="font-display text-lg font-bold uppercase">
+            Made by Rishi<span className="text-accent">.</span>
+          </p>
           <p className="mt-2 max-w-xs text-sm text-muted">
             I take ideas from concept to reality, in whatever medium the idea
             needs.
@@ -35,11 +37,6 @@ export function Footer() {
           <li>
             <a href={site.social.linkedin} className="hover:text-accent">
               LinkedIn
-            </a>
-          </li>
-          <li>
-            <a href={site.social.instagram} className="hover:text-accent">
-              Instagram
             </a>
           </li>
           <li>

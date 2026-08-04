@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
+import { externalPosts } from "./external-posts";
 
 const contentRoot = path.join(process.cwd(), "content");
 
@@ -13,6 +14,8 @@ export type WorkFrontmatter = {
   heroAlt?: string;
   tags?: string[];
   featured?: boolean;
+  repo?: string; // GitHub URL
+  live?: string; // deployed URL
 };
 
 export type BlogFrontmatter = {
@@ -69,4 +72,44 @@ export function getPosts(): Entry<BlogFrontmatter>[] {
 
 export function getPostBySlug(slug: string): Entry<BlogFrontmatter> | undefined {
   return getPosts().find((e) => e.slug === slug);
+}
+
+/*
+  One reading list. Local MDX posts and posts published on Medium, newest
+  first — external ones keep their canonical home and open off-site.
+*/
+export type FeedPost = {
+  key: string;
+  title: string;
+  href: string;
+  description: string;
+  date: string;
+  readingTimeMinutes: number;
+  external: boolean;
+  source?: string;
+};
+
+export function getFeedPosts(): FeedPost[] {
+  const local: FeedPost[] = getPosts().map((p) => ({
+    key: p.slug,
+    title: p.frontmatter.title,
+    href: `/blog/${p.slug}`,
+    description: p.frontmatter.description,
+    date: p.frontmatter.date,
+    readingTimeMinutes: p.readingTimeMinutes,
+    external: false,
+  }));
+
+  const external: FeedPost[] = externalPosts.map((p) => ({
+    key: p.url,
+    title: p.title,
+    href: p.url,
+    description: p.description,
+    date: p.date,
+    readingTimeMinutes: p.readingTimeMinutes,
+    external: true,
+    source: p.source,
+  }));
+
+  return [...local, ...external].sort((a, b) => b.date.localeCompare(a.date));
 }

@@ -1,0 +1,62 @@
+---
+title: "FinRatio"
+outcome: "A financial-analysis platform for credit and ratio calculations — OTP auth, protected calculators, AI-assisted insights, PDF reports."
+description: "Case study: building FinRatio with Next.js App Router, Prisma with Turso/LibSQL, email-OTP authentication, DSCR and debt-equity calculators, and an AI credit-analysis endpoint."
+date: "2026-05-03"
+tags: ["Next.js", "TypeScript", "Prisma", "Fintech"]
+featured: true
+repo: "https://github.com/Rishi9322/finRatio"
+live: "https://fin-ratio.vercel.app"
+---
+
+> Draft written from the repo README — add screenshots and outcome metrics
+> from the Week 0 content audit.
+
+## Spark
+
+Credit assessment runs on a handful of ratios — DSCR, debt-to-equity — that
+get recomputed in ad-hoc spreadsheets with no history and no explanation.
+The idea: a focused tool that computes them properly, remembers every
+calculation, and explains what the numbers mean.
+
+## Shape
+
+The product shape is a funnel: public landing page with a login-aware call to
+action, then an auth wall, then the calculators. Auth was designed
+deliberately — email OTP sign-in, JWT sessions in HTTP-only cookies — because
+a finance tool that's casual about auth isn't credible.
+
+## Build
+
+Next.js 14 App Router + TypeScript + Tailwind, with Prisma over
+SQLite/Turso-compatible LibSQL. Every calculation is persisted through
+Prisma, so the dashboard shows history, not just answers. An AI analysis
+endpoint turns a raw ratio into a credit insight:
+
+```text
+/auth        → email OTP sign-up and sign-in
+/dashboard   → protected: history of every calculation
+/calculator  → DSCR and debt-equity workflows
+/api/ai      → AI-assisted credit insight from computed ratios
+```
+
+PDF generation utilities export any analysis as a report a human can hand to
+another human.
+
+## Launch
+
+Deployed on Vercel at [fin-ratio.vercel.app](https://fin-ratio.vercel.app).
+A second iteration (FinrationFig) pushed the platform further: RBAC with
+SUPER_ADMIN/ADMIN/USER roles, per-user calculator feature gating, CSRF
+protection, rate-limited auth routes, and an admin panel.
+
+## Capture
+
+The project became a two-generation story — the v1 proved the calculators
+and history model; the v2 rebuilt the access layer to production standards.
+
+## Reflection
+
+Fintech UI is trust UI. Half the engineering here — OTP flows, cookie
+security, rate limits, RBAC — is invisible in a screenshot, and it's the
+half that makes the visible half believable.

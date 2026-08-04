@@ -1,0 +1,66 @@
+---
+title: "DentSeg / OralVisionX"
+outcome: "A reproducible deep-learning pipeline for tooth segmentation in dental X-rays — served by a full-stack app that never overstates what the model knows."
+description: "Case study: training and ablating U-Net models for tooth-region segmentation, then shipping them behind a FastAPI + Next.js research workstation with AI-generated reports."
+date: "2026-07-14"
+tags: ["PyTorch", "FastAPI", "Next.js", "Research"]
+featured: true
+repo: "https://github.com/Rishi9322/DentSeg"
+---
+
+> Draft written from the repo README — add screenshots, metrics (Dice/IoU
+> scores, ablation results), and one lesson from the Week 0 content audit.
+
+## Spark
+
+Deep learning papers on dental imaging rarely ship anything a clinician could
+touch. The idea: take a real research question — how well can U-Net variants
+segment tooth regions in panoramic X-rays — and carry it all the way from
+training runs to a working product, without letting the product exaggerate
+the science.
+
+## Shape
+
+Reproducibility was the design brief. Experiment tracking, ablations, and
+error analysis were first-class requirements from day one, grounded in a 2026
+systematic review of the field (Zhou et al., CAAI AIR). The application layer
+was designed around a hard honesty constraint: the model does binary
+tooth-region segmentation only — it must never imply it detects caries or
+diagnoses anything.
+
+## Build
+
+Two halves. The research half trains and ablates U-Net models on public PAN
+datasets. The product half — OralVisionX — is a FastAPI backend serving real
+inference (mask, overlay, confidence heatmap, per-region geometry) with a
+Next.js research-workstation UI: auth-gated dashboard, image analysis, and
+AI-generated reports.
+
+The report generator only ever sees the model's structured output, never the
+image itself:
+
+```text
+POST /api/infer   → U-Net inference: mask + overlay + confidence heatmap
+POST /api/report  → doctor/patient/technical reports from structured
+                    prediction output ONLY — with explicit "not checked" lists
+```
+
+Report providers chain from a free local rule-based template through
+OpenRouter free-tier models to a paid fallback — cost-aware by design.
+
+## Launch
+
+The app ships with a human-in-the-loop feedback endpoint — thumbs up/down and
+comments on every prediction, stored for review and future retraining.
+
+## Capture
+
+Every report the system generates states what the model did and did not check
+and defers to a dentist for diagnosis — the documentation is part of the
+product.
+
+## Reflection
+
+The hardest engineering constraint wasn't the model — it was building an AI
+product that refuses to overclaim. Honesty as an architectural requirement
+changed the API design, the report templates, and the UI copy.

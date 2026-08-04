@@ -1,0 +1,56 @@
+---
+title: "SentimentAI"
+outcome: "A fine-tuned FinBERT model reading sentiment in Indian financial news — live dashboard tracking 30 NIFTY 50 stocks."
+description: "Case study: fine-tuning FinBERT on financial text with PyTorch, then serving it from a Flask API with real-time stock prices, RSS news ingestion, and a Chart.js dashboard."
+date: "2026-07-02"
+tags: ["PyTorch", "NLP", "Flask", "Finance"]
+featured: false
+repo: "https://github.com/Rishi9322/sentimental-Aanalysis"
+live: "https://sentimental-aanalysis.onrender.com"
+---
+
+> Draft written from the repo README — add evaluation numbers (accuracy,
+> confusion matrix) and screenshots from the Week 0 content audit.
+
+## Spark
+
+Financial news sentiment models are trained on US market language. Indian
+market coverage — MoneyControl, Economic Times, LiveMint — reads differently.
+The question: does fine-tuning FinBERT on financial phrase data plus Indian
+news samples produce a model that reads this market better?
+
+## Shape
+
+The system was designed as a full pipeline, not a notebook: download and
+preprocess the Kaggle FinancialPhraseBank dataset, fine-tune, evaluate with a
+confusion matrix, then serve the result behind an API a dashboard can use.
+
+## Build
+
+PyTorch fine-tuning with FP16 mixed precision on GPU (CPU fallback included),
+~4,900 training samples. The serving layer is Flask: a sentiment endpoint for
+any financial text, real-time prices from Alpha Vantage, an RSS news fetcher
+with fallback data, and SQLite for stocks and results.
+
+```text
+training/   download → preprocess → fine-tune (FP16) → evaluate
+backend/    Flask API: sentiment, live prices, news, SQLite
+frontend/   dark glassmorphism dashboard, Chart.js, 30 NIFTY 50 stocks
+```
+
+## Launch
+
+Deployed live at
+[sentimental-aanalysis.onrender.com](https://sentimental-aanalysis.onrender.com) —
+paste any financial headline and get positive/neutral/negative with scores.
+
+## Capture
+
+The dashboard is the demo: 30 NIFTY 50 stocks with interactive price charts,
+each paired with the model's reading of the day's news.
+
+## Reflection
+
+Fine-tuning was the easy half. The engineering that made it a product —
+price APIs with rate limits, RSS feeds that go down, model loading on a
+CPU-only free tier — taught me more than the training loop did.

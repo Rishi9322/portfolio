@@ -13,9 +13,9 @@ export function Header() {
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-5 py-4">
         <Link
           href="/"
-          className="font-display text-lg font-semibold tracking-tight"
+          className="font-display text-lg font-bold uppercase tracking-tight"
         >
-          MADE BY RISHI
+          Made by Rishi<span className="text-accent">.</span>
         </Link>
         <nav aria-label="Primary">
           <ul className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">

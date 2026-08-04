@@ -1,17 +1,22 @@
 @import "tailwindcss";
 
 /*
-  Design tokens — PRD §6:
-  warm monochrome (near-black / warm white), ONE accent color.
-  Accent committed: warm orange.
+  Design tokens v2 — "print shop / poster wall".
+  Grounded in the subject: Rishi designs the poster before the product.
+  Paper white / ink navy / one poster-red accent (PRD §6: one accent only).
 */
 :root {
-  --background: #faf7f2;
-  --foreground: #1c1917;
-  --muted: #6f6862;
-  --subtle: #f1ece4;
-  --accent: #c2410c;
-  --border: #e5ddd2;
+  --background: #f6f3eb;
+  --foreground: #1a1d21;
+  --muted: #5d5c55;
+  --subtle: #ebe7db;
+  --accent: #d13c0a;
+  --border: #d8d3c4;
+  /*
+    One accent, no second hue (PRD §6). Rhythm comes from tint strength and
+    weight — accent/5 → /10 → /15 — never from introducing another colour.
+  */
+  --accent-wash: color-mix(in srgb, var(--accent) 8%, transparent);
 }
 
 @theme inline {
@@ -21,8 +26,10 @@
   --color-subtle: var(--subtle);
   --color-accent: var(--accent);
   --color-border: var(--border);
+  --color-accent-wash: var(--accent-wash);
   --font-sans: var(--font-geist-sans);
-  --font-display: var(--font-fraunces);
+  --font-display: var(--font-bricolage);
+  --font-mono: var(--font-geist-mono);
 }
 
 html {
@@ -70,6 +77,69 @@ body {
   top: 0;
 }
 
+/*
+  Overprint tint — a skewed swipe of the accent laid behind the word, the way a
+  second pass of ink sits slightly off-register on a riso print.
+*/
+.text-highlight {
+  color: var(--accent);
+  position: relative;
+  isolation: isolate;
+}
+.text-highlight::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: -0.04em;
+  right: -0.01em;
+  bottom: 0.05em;
+  height: 0.32em;
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  transform: skewX(-5deg);
+}
+
+/* Ticker marquee — pauses for reduced motion */
+.ticker {
+  overflow: hidden;
+  white-space: nowrap;
+}
+.ticker-track {
+  display: inline-flex;
+  width: max-content;
+  animation: ticker 28s linear infinite;
+}
+.ticker:hover .ticker-track {
+  animation-play-state: paused;
+}
+@keyframes ticker {
+  to {
+    transform: translateX(-50%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track {
+    animation: none;
+  }
+}
+
+/* Registration/crop marks — print vernacular for card corners */
+.cropmarks {
+  position: relative;
+}
+.cropmarks > .mark {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-color: var(--muted);
+  border-style: solid;
+  border-width: 0;
+  pointer-events: none;
+}
+.cropmarks > .mark:nth-child(1) { top: -1px; left: -1px; border-top-width: 1.5px; border-left-width: 1.5px; }
+.cropmarks > .mark:nth-child(2) { top: -1px; right: -1px; border-top-width: 1.5px; border-right-width: 1.5px; }
+.cropmarks > .mark:nth-child(3) { bottom: -1px; left: -1px; border-bottom-width: 1.5px; border-left-width: 1.5px; }
+.cropmarks > .mark:nth-child(4) { bottom: -1px; right: -1px; border-bottom-width: 1.5px; border-right-width: 1.5px; }
+
 /* Editorial prose styles for MDX (case studies + blog) */
 .prose {
   max-width: 70ch;
@@ -77,11 +147,12 @@ body {
   line-height: 1.75;
 }
 .prose h2 {
-  font-family: var(--font-fraunces), Georgia, serif;
-  font-size: 1.75rem;
-  line-height: 1.2;
-  margin: 2.5rem 0 1rem;
-  letter-spacing: -0.01em;
+  font-family: var(--font-bricolage), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 1.8rem;
+  line-height: 1.15;
+  margin: 2.75rem 0 1rem;
+  letter-spacing: -0.02em;
 }
 .prose h3 {
   font-weight: 600;
@@ -122,16 +193,18 @@ body {
   border-radius: 4px;
   padding: 0.15rem 0.4rem;
   font-size: 0.9em;
+  font-family: var(--font-geist-mono), monospace;
 }
 .prose pre {
-  background: #211d1a;
-  color: #f5f0e8;
+  background: #14181f;
+  color: #eef0e9;
   border-radius: 10px;
   padding: 1.25rem 1.5rem;
   overflow-x: auto;
   margin: 1.5rem 0;
   font-size: 0.9rem;
   line-height: 1.6;
+  font-family: var(--font-geist-mono), monospace;
 }
 .prose pre code {
   background: none;
