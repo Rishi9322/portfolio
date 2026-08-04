@@ -2,10 +2,13 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Bricolage_Grotesque } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { CookieConsent } from "@/components/CookieConsent";
+import { WebMCPTools, type WebMCPData } from "@/components/WebMCPTools";
+import { getWork, getFeedPosts } from "@/lib/content";
+import { allProjects } from "@/lib/projects";
 import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { site } from "@/lib/site";
+import { site, booking } from "@/lib/site";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -63,6 +66,38 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Read-only snapshot handed to WebMCP so browser agents can query the site.
+  const mcpData: WebMCPData = {
+    projects: allProjects.map((p) => ({
+      name: p.name,
+      blurb: p.blurb,
+      stack: [...p.stack],
+      year: p.year,
+      url: p.live ?? p.repo,
+    })),
+    work: getWork().map((w) => ({
+      title: w.frontmatter.title,
+      outcome: w.frontmatter.outcome,
+      url: `${site.url}/work/${w.slug}`,
+      tags: w.frontmatter.tags ?? [],
+    })),
+    posts: getFeedPosts().map((p) => ({
+      title: p.title,
+      description: p.description,
+      url: p.external ? p.href : `${site.url}${p.href}`,
+      date: p.date,
+      source: p.source ?? "madebyrishi",
+    })),
+    contact: {
+      email: site.email,
+      booking: booking.options.map((b) => ({
+        label: b.label,
+        minutes: b.minutes,
+        url: b.url,
+      })),
+    },
+  };
+
   return (
     <html
       lang="en"
@@ -87,6 +122,7 @@ export default function RootLayout({
           opts in. Vercel Analytics stays outside it — it is cookieless.
         */}
         <CookieConsent />
+        <WebMCPTools data={mcpData} />
       </body>
     </html>
   );
